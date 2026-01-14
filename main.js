@@ -76,7 +76,7 @@ async function startAR() {
   const loader = new THREE.GLTFLoader();
 
   loader.load(
-    "model.glb",
+    "./model.glb",
     (gltf) => {
 
       alert("GLB 読み込み成功");
@@ -126,3 +126,4 @@ function animate() {
   if (controls) controls.update();
   renderer.render(scene, camera);
 }
+
