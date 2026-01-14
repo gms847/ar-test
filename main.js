@@ -1,3 +1,8 @@
+alert(
+  "GLTFLoader: " +
+  (typeof THREE.GLTFLoader === "function" ? "OK" : "NG")
+);
+
 /* ===============================
    iPhone用：JSエラー可視化
 ================================ */
@@ -126,4 +131,5 @@ function animate() {
   if (controls) controls.update();
   renderer.render(scene, camera);
 }
+
 
