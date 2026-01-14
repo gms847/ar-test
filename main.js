@@ -19,29 +19,28 @@ let model, controls;
    開始ボタン
 ================================ */
 startButton.addEventListener("click", async () => {
-  alert("開始ボタンが押されました");   // ← 確認用
+  alert("開始ボタンが押されました");
   overlay.style.display = "none";
   await startAR();
 });
 
 /* ===============================
-   AR開始処理
+   AR開始
 ================================ */
 async function startAR() {
 
-  alert("startAR() 開始"); // ← ここまで来ているか確認
+  alert("startAR 開始");
 
-  /* ----- ① カメラ起動 ----- */
+  /* ----- カメラ ----- */
   const stream = await navigator.mediaDevices.getUserMedia({
     video: { facingMode: "environment" },
     audio: false
   });
-
   video.srcObject = stream;
 
-  alert("カメラ起動完了"); // ← ここが出なければ getUserMedia 失敗
+  alert("カメラ起動完了");
 
-  /* ----- ② Three.js 初期化 ----- */
+  /* ----- Three.js ----- */
   scene = new THREE.Scene();
 
   camera = new THREE.PerspectiveCamera(
@@ -66,35 +65,33 @@ async function startAR() {
 
   document.body.appendChild(renderer.domElement);
 
-  /* ----- ③ ライト ----- */
   scene.add(new THREE.AmbientLight(0xffffff, 2));
-
   const dir = new THREE.DirectionalLight(0xffffff, 1.5);
   dir.position.set(1, 1, 1);
   scene.add(dir);
 
   alert("Three.js 初期化完了");
 
-  /* ----- ④ OBJ 読み込み ----- */
-  const loader = new THREE.OBJLoader();
+  /* ----- GLB 読み込み ----- */
+  const loader = new THREE.GLTFLoader();
 
   loader.load(
-    "model.obj",
-    (obj) => {
+    "model.glb",
+    (gltf) => {
 
-      alert("OBJ 読み込み成功");
+      alert("GLB 読み込み成功");
 
-      model = obj;
+      model = gltf.scene;
 
-      model.traverse((mesh) => {
-        if (mesh.isMesh) {
-          mesh.material.side = THREE.DoubleSide;
+      model.traverse((obj) => {
+        if (obj.isMesh) {
+          obj.material.side = THREE.DoubleSide;
         }
       });
 
       scene.add(model);
 
-      /* ----- 強制的に見える位置へ ----- */
+      /* 強制的に見える状態にする */
       const box = new THREE.Box3().setFromObject(model);
       const size = box.getSize(new THREE.Vector3());
       const center = box.getCenter(new THREE.Vector3());
@@ -107,7 +104,6 @@ async function startAR() {
       camera.position.set(0, 0, 2);
       camera.lookAt(0, 0, 0);
 
-      /* ----- 操作 ----- */
       controls = new THREE.OrbitControls(camera, renderer.domElement);
       controls.enablePan = false;
       controls.enableDamping = true;
@@ -116,27 +112,17 @@ async function startAR() {
     },
     undefined,
     (err) => {
-      alert("OBJ 読み込み失敗");
+      alert("GLB 読み込み失敗");
       console.error(err);
     }
   );
 }
 
 /* ===============================
-   描画ループ
+   描画
 ================================ */
 function animate() {
   requestAnimationFrame(animate);
   if (controls) controls.update();
   renderer.render(scene, camera);
 }
-
-/* ===============================
-   リサイズ対応
-================================ */
-window.addEventListener("resize", () => {
-  if (!camera || !renderer) return;
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
-});
