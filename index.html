@@ -4,21 +4,21 @@
   <meta charset="utf-8">
   <title>AR展示</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <style>
     body {
       margin: 0;
       overflow: hidden;
       background: #000;
     }
+    /* カメラ映像を背面に固定 */
     #camera-video {
       position: fixed;
       top: 0;
       left: 0;
       width: 100vw;
       height: 100vh;
-      object-fit: cover; /* 画面いっぱいに引き伸ばす */
-      z-index: -1;      /* Three.jsより後ろに配置 */
+      object-fit: cover;
+      z-index: -1;
     }
     #overlay {
       position: fixed;
@@ -29,14 +29,30 @@
       justify-content: center;
       z-index: 1000;
     }
-
+    #startButton {
+      font-size: 20px;
+      padding: 12px 24px;
+      cursor: pointer;
+    }
   </style>
 </head>
-
 <body>
-  <video id="camera-video" playsinline muted></video>
-  <div id="overlay">
-    <button id="startButton">開始</button>
-  </div>
+
+<video id="camera-video" playsinline muted></video>
+
+<div id="overlay">
+  <button id="startButton">開始</button>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "./three.min.js"
+  }
+}
+</script>
+
+<script type="module" src="main.js"></script>
+
 </body>
 </html>
