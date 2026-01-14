@@ -45,12 +45,19 @@ async function startAR() {
 
   // ---- モデル ----
   const loader = new THREE.GLTFLoader();
-  loader.load("model.glb", (gltf) => {
+  loader.load(
+  "model.glb",
+  (gltf) => {
+    console.log("GLB loaded");
     model = gltf.scene;
-    model.scale.setScalar(1);
-    initialScale = 1;
     scene.add(model);
-  });
+  },
+  undefined,
+  (error) => {
+    console.error("GLB error", error);
+  }
+);
+
 
   // ---- 操作 ----
   controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -83,3 +90,4 @@ window.addEventListener("resize", () => {
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
+
