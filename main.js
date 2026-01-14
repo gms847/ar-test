@@ -1,3 +1,7 @@
+window.onerror = function (msg, url, line) {
+  alert("JSエラー:\n" + msg + "\n" + line);
+};
+
 const loader = new THREE.GLTFLoader();
 loader.load(
   "model.glb",
@@ -44,4 +48,5 @@ loader.load(
     console.error(error);
   }
 );
+
 
