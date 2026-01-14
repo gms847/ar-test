@@ -4,15 +4,18 @@ import { OrbitControls } from './OrbitControls.js';
 
 let scene, camera, renderer, controls;
 
+// 開始ボタンの処理
 document.getElementById("startButton").addEventListener("click", async function () {
-  console.log("Button clicked");
+  console.log("開始ボタンが押されました");
+  
+  // UIを隠す
   document.getElementById("overlay").style.display = "none";
 
   try {
-    // 1. Three.js を先に初期化（カメラを待たずに画面を作る）
+    // 1. Three.jsの初期化（先に土台を作る）
     initThree();
+    loadGLB();
     animate();
-    console.log("Three.js initialized");
 
     // 2. カメラの起動
     const stream = await navigator.mediaDevices.getUserMedia({
@@ -22,53 +25,60 @@ document.getElementById("startButton").addEventListener("click", async function 
 
     const video = document.getElementById("camera-video");
     video.srcObject = stream;
-    
-    // play()に失敗しても3D側を止めないようにする
-    video.play().catch(e => console.warn("Video play deferred", e));
+    await video.play();
 
-    // 3. 3Dモデルの読み込み
-    loadGLB();
+    console.log("システムが正常に起動しました");
 
   } catch (err) {
-    console.error("Error details:", err);
-    alert("エラーが発生しました: " + err.message);
+    console.error("起動エラー:", err);
+    alert("カメラを起動できませんでした。HTTPS接続とカメラ許可を確認してください。");
   }
 });
 
 function initThree() {
   scene = new THREE.Scene();
+  
   camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
   camera.position.set(0, 1, 3);
 
   renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-  renderer.setClearColor(0x000000, 0); 
+  renderer.setClearColor(0x000000, 0); // 背景を透明にする
   renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   
-  // 3Dレイヤーをカメラ映像の上に配置
+  // 3Dキャンバスを最前面に配置（ビデオより上）
   renderer.domElement.style.position = "fixed";
   renderer.domElement.style.top = "0";
   renderer.domElement.style.zIndex = "10";
   document.body.appendChild(renderer.domElement);
 
+  // 照明
   const light = new THREE.AmbientLight(0xffffff, 1.0);
   scene.add(light);
-  
+  const dirLight = new THREE.DirectionalLight(0xffffff, 1.5);
+  dirLight.position.set(5, 5, 5);
+  scene.add(dirLight);
+
+  // 操作
   controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+
+  window.addEventListener('resize', onWindowResize);
 }
 
 function loadGLB() {
-  // 動作確認用の赤い箱
-  const cube = new THREE.Mesh(
-    new THREE.BoxGeometry(0.5, 0.5, 0.5),
-    new THREE.MeshStandardMaterial({ color: 0xff0000 })
-  );
+  // 動作確認用の赤い立方体
+  const geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+  const material = new THREE.MeshStandardMaterial({ color: 0xff0000 });
+  const cube = new THREE.Mesh(geometry, material);
   cube.position.y = 0.5;
   scene.add(cube);
+}
 
-  // 本番用モデルの読み込み（必要ならコメント解除）
-  // const loader = new GLTFLoader();
-  // loader.load('logo.glb', (gltf) => { scene.add(gltf.scene); });
+function onWindowResize() {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
 function animate() {
