@@ -8,13 +8,18 @@ log("main.js 実行確認");
 
 let scene, camera, renderer, controls;
 
-document.getElementById("startButton").addEventListener("click", async () => {
+document.getElementById("startButton").addEventListener("click", () => {
   alert("開始ボタンが押されました");
   document.getElementById("overlay").style.display = "none";
-  await startAR();
+
+  // ★ ユーザー操作直結で実行
+  initThree();
+  startCamera();   // ← await しない
+  loadGLB();
+  animate();
 });
 
-async function startAR() {
+function initThree() {
   log("Three.js 初期化 開始");
 
   scene = new THREE.Scene();
@@ -44,49 +49,54 @@ async function startAR() {
   controls.enableDamping = true;
 
   log("Three.js 初期化 ok");
-
-  await startCamera();
-  loadGLB();
-
-  animate();
 }
 
-async function startCamera() {
-  const stream = await navigator.mediaDevices.getUserMedia({
+function startCamera() {
+  log("カメラ起動要求");
+
+  navigator.mediaDevices.getUserMedia({
     video: { facingMode: "environment" },
     audio: false
+  })
+  .then((stream) => {
+    log("getUserMedia 成功");
+
+    const video = document.createElement("video");
+    video.srcObject = stream;
+    video.playsInline = true;
+    video.muted = true;
+
+    video.onloadedmetadata = () => {
+      video.play();
+      log("video 再生開始");
+
+      const videoTexture = new THREE.VideoTexture(video);
+      scene.background = videoTexture;
+
+      log("カメラ起動完了");
+    };
+  })
+  .catch((err) => {
+    log("getUserMedia 失敗");
+    log(err.name + ": " + err.message);
   });
-
-  const video = document.createElement("video");
-  video.srcObject = stream;
-  video.playsInline = true;
-  await video.play();
-
-  const videoTexture = new THREE.VideoTexture(video);
-  scene.background = videoTexture;
-
-  log("カメラ起動完了");
 }
 
 function loadGLB() {
-  log("★★ GLB 読み込み開始 ★★");
+  log("GLB 読み込み開始");
 
   const loader = new THREE.GLTFLoader();
-
   loader.load(
     "https://gms847.github.io/ar-test/model.glb",
     (gltf) => {
-      log("★★ GLB 読み込み成功 ★★");
-
+      log("GLB 読み込み成功");
       const model = gltf.scene;
       model.position.set(0, 0, -1);
-      model.scale.set(1, 1, 1);
-
       scene.add(model);
     },
     undefined,
     (error) => {
-      log("★★ GLB 読み込み失敗 ★★");
+      log("GLB 読み込み失敗");
       console.error(error);
     }
   );
