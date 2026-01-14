@@ -8,6 +8,7 @@ button.addEventListener("click", async () => {
   alert("開始ボタンが押されました");
   overlay.style.display = "none";
   await startCamera();
+  alert("カメラ起動完了");
   initThree();
 });
 
@@ -19,35 +20,40 @@ async function startCamera() {
 }
 
 function initThree() {
+  alert("Three.js 初期化 開始");
+
   const scene = new THREE.Scene();
+  alert("Scene OK");
 
   const camera = new THREE.PerspectiveCamera(
-    60, window.innerWidth / window.innerHeight, 0.1, 100
+    60,
+    window.innerWidth / window.innerHeight,
+    0.1,
+    100
   );
   camera.position.set(0, 0, 2);
+  alert("Camera OK");
 
-  const renderer = new THREE.WebGLRenderer({ alpha: true });
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  document.body.appendChild(renderer.domElement);
-
-  scene.add(new THREE.HemisphereLight(0xffffff, 0x444444, 1.2));
-
-  const loader = new THREE.GLTFLoader();
-  loader.load(
-    "model.glb",
-    (gltf) => {
-      scene.add(gltf.scene);
-      alert("GLB 読み込み成功");
-    },
-    undefined,
-    () => alert("GLB 読み込み失敗")
-  );
-
-  const controls = new THREE.OrbitControls(camera, renderer.domElement);
-
-  function animate() {
-    requestAnimationFrame(animate);
-    renderer.render(scene, camera);
+  let renderer;
+  try {
+    renderer = new THREE.WebGLRenderer({ alpha: true });
+    alert("Renderer 生成 OK");
+  } catch (e) {
+    alert("Renderer 生成 NG");
+    return;
   }
-  animate();
+
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  alert("Renderer サイズ設定 OK");
+
+  document.body.appendChild(renderer.domElement);
+  alert("Canvas 追加 OK");
+
+  const light = new THREE.HemisphereLight(0xffffff, 0x444444, 1.2);
+  scene.add(light);
+  alert("Light OK");
+
+  alert("Three.js 初期化 完了");
+
+  // ★ あえて GLB はまだ読み込まない
 }
