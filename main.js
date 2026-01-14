@@ -1,3 +1,23 @@
+/* ===== GLTFLoader 内蔵（Safari・展示用） ===== */
+THREE.GLTFLoader = function (manager) {
+  this.manager = (manager !== undefined) ? manager : THREE.DefaultLoadingManager;
+};
+
+THREE.GLTFLoader.prototype.load = function (url, onLoad, onProgress, onError) {
+  const loader = new THREE.FileLoader(this.manager);
+  loader.setResponseType('arraybuffer');
+  loader.load(url, (data) => {
+    try {
+      const parser = new THREE.GLTFParser(data, '', this.manager);
+      parser.parse((gltf) => {
+        onLoad(gltf);
+      }, onError);
+    } catch (e) {
+      if (onError) onError(e);
+    }
+  }, onProgress, onError);
+};
+
 alert(
   "GLTFLoader: " +
   (typeof THREE.GLTFLoader === "function" ? "OK" : "NG")
@@ -131,5 +151,6 @@ function animate() {
   if (controls) controls.update();
   renderer.render(scene, camera);
 }
+
 
 
