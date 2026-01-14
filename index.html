@@ -3,17 +3,7 @@
 <head>
   <meta charset="utf-8">
   <title>AR展示</title>
-
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1.0, user-scalable=no">
-
-  <!-- Three.js 本体 -->
-  <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
-
-  <!-- 操作 -->
-  <script src="https://unpkg.com/three@0.160.0/examples/js/controls/OrbitControls.js"></script>
-
-  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
     html, body {
@@ -21,10 +11,7 @@
       padding: 0;
       overflow: hidden;
       background: black;
-      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
     }
-
-    /* カメラ映像 */
     #camera {
       position: fixed;
       inset: 0;
@@ -32,67 +19,38 @@
       height: 100%;
       object-fit: cover;
       z-index: 0;
-      background: black;
     }
-
-    /* 開始前オーバーレイ */
     #overlay {
       position: fixed;
       inset: 0;
       background: rgba(0,0,0,0.85);
+      color: white;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      text-align: center;
-      color: white;
       z-index: 10;
-      padding: 24px;
-      box-sizing: border-box;
+      text-align: center;
     }
-
-    #overlay img {
-      width: 120px;
-      margin-bottom: 24px;
-    }
-
-    #overlay p {
-      font-size: 15px;
-      line-height: 1.8;
-      margin-bottom: 24px;
-    }
-
     #startButton {
       font-size: 18px;
       padding: 12px 36px;
       border-radius: 999px;
       border: none;
-      background: white;
-      color: black;
-      cursor: pointer;
     }
   </style>
 </head>
 
 <body>
 
-  <!-- 背景カメラ -->
-  <video id="camera" autoplay muted playsinline></video>
+<video id="camera" autoplay muted playsinline></video>
 
-  <!-- 開始前説明 -->
-  <div id="overlay">
-    <img src="logo.png" alt="ロゴ">
-    <p>
-      対象物の3Dモデル<br><br>
-      ・ドラッグ：回転<br>
-      ・ピンチ：拡大・縮小
-    </p>
-    <button id="startButton">開始</button>
-  </div>
+<div id="overlay">
+  <img src="logo.png" width="120">
+  <p>対象物の3Dモデル</p>
+  <button id="startButton">開始</button>
+</div>
 
-  <!-- メイン処理 -->
-  <script src="main.js"></script>
-
+<script type="module" src="main.js"></script>
 </body>
 </html>
-
