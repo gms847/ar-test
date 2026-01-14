@@ -44,6 +44,11 @@ function initThree() {
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setPixelRatio(window.devicePixelRatio);
   document.body.appendChild(renderer.domElement);
+  renderer.domElement.style.position = "fixed";
+  renderer.domElement.style.top = "0";
+  renderer.domElement.style.left = "0";
+  renderer.domElement.style.zIndex = "0";   // ← 背面
+
 
   // ★ カメラ映像を背景に設定
   videoTexture = new THREE.VideoTexture(video);
@@ -77,3 +82,4 @@ function animate() {
   controls.update();
   renderer.render(scene, camera);
 }
+
