@@ -96,7 +96,7 @@ function loadGLB(scene) {
 
   alert("GLB 読み込み開始");
 
-  fetch("/ar-test/model.glb")
+  fetch(fetch("https://gms847.github.io/ar-test/model.glb")
     .then(res => {
       if (!res.ok) {
         throw new Error("fetch failed");
@@ -129,4 +129,5 @@ function loadGLB(scene) {
       alert("GLB 取得失敗");
     });
 }
+
 
