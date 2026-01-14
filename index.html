@@ -9,8 +9,13 @@
       margin: 0;
       overflow: hidden;
       background: #000;
+      /* 画面のバウンスなどを防止 */
+      position: fixed;
+      width: 100%;
+      height: 100%;
     }
-    /* カメラ映像を背面に固定 */
+
+    /* カメラ映像：最背面 */
     #camera-video {
       position: fixed;
       top: 0;
@@ -20,19 +25,33 @@
       object-fit: cover;
       z-index: -1;
     }
+
+    /* オーバーレイ（開始画面）：最前面 */
     #overlay {
       position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.85);
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      z-index: 1000;
+      z-index: 9999; /* 非常に高い値を設定 */
+      pointer-events: auto; /* クリックを確実に受け取る */
     }
+
     #startButton {
-      font-size: 20px;
-      padding: 12px 24px;
+      font-size: 24px;
+      font-weight: bold;
+      padding: 20px 40px;
       cursor: pointer;
+      background-color: #ffffff;
+      border: none;
+      border-radius: 8px;
+      color: #000;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
     }
   </style>
 </head>
@@ -42,6 +61,7 @@
 
 <div id="overlay">
   <button id="startButton">開始</button>
+  <p style="color: white; margin-top: 20px;">カメラの使用を許可してください</p>
 </div>
 
 <script type="importmap">
