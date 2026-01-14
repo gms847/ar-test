@@ -1,52 +1,142 @@
+/* ===============================
+   iPhone用：JSエラー可視化
+================================ */
 window.onerror = function (msg, url, line) {
-  alert("JSエラー:\n" + msg + "\n" + line);
+  alert("JSエラー:\n" + msg + "\n行: " + line);
 };
 
-const loader = new THREE.GLTFLoader();
-loader.load(
-  "model.glb",
-  (gltf) => {
+/* ===============================
+   DOM取得
+================================ */
+const video = document.getElementById("camera");
+const overlay = document.getElementById("overlay");
+const startButton = document.getElementById("startButton");
 
-    model = gltf.scene;
+let scene, camera, renderer;
+let model, controls;
 
-    // ===== 強制補正 =====
-    model.traverse((obj) => {
-      if (obj.isMesh) {
-        obj.material.side = THREE.DoubleSide;
-      }
-    });
+/* ===============================
+   開始ボタン
+================================ */
+startButton.addEventListener("click", async () => {
+  alert("開始ボタンが押されました");   // ← 確認用
+  overlay.style.display = "none";
+  await startAR();
+});
 
-    scene.add(model);
+/* ===============================
+   AR開始処理
+================================ */
+async function startAR() {
 
-    // ===== サイズを完全に正規化 =====
-    const box = new THREE.Box3().setFromObject(model);
-    const size = box.getSize(new THREE.Vector3());
-    const center = box.getCenter(new THREE.Vector3());
+  alert("startAR() 開始"); // ← ここまで来ているか確認
 
-    // 原点に移動
-    model.position.sub(center);
+  /* ----- ① カメラ起動 ----- */
+  const stream = await navigator.mediaDevices.getUserMedia({
+    video: { facingMode: "environment" },
+    audio: false
+  });
 
-    // 最大辺を基準にスケール
-    const maxDim = Math.max(size.x, size.y, size.z);
-    const scale = 1 / maxDim;
-    model.scale.setScalar(scale);
+  video.srcObject = stream;
 
-    // ===== カメラを確実に前へ =====
-    camera.position.set(0, 0, 2);
-    camera.lookAt(0, 0, 0);
+  alert("カメラ起動完了"); // ← ここが出なければ getUserMedia 失敗
 
-    // 操作
-    controls = new THREE.OrbitControls(camera, renderer.domElement);
-    controls.enablePan = false;
-    controls.enableDamping = true;
+  /* ----- ② Three.js 初期化 ----- */
+  scene = new THREE.Scene();
 
-    animate();
-  },
-  undefined,
-  (error) => {
-    alert("model.glb の読み込みに失敗しました");
-    console.error(error);
-  }
-);
+  camera = new THREE.PerspectiveCamera(
+    60,
+    window.innerWidth / window.innerHeight,
+    0.01,
+    100
+  );
 
+  renderer = new THREE.WebGLRenderer({
+    antialias: true,
+    alpha: false
+  });
 
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.setClearColor(0x000000, 1);
+
+  renderer.domElement.style.position = "fixed";
+  renderer.domElement.style.inset = "0";
+  renderer.domElement.style.zIndex = "1";
+
+  document.body.appendChild(renderer.domElement);
+
+  /* ----- ③ ライト ----- */
+  scene.add(new THREE.AmbientLight(0xffffff, 2));
+
+  const dir = new THREE.DirectionalLight(0xffffff, 1.5);
+  dir.position.set(1, 1, 1);
+  scene.add(dir);
+
+  alert("Three.js 初期化完了");
+
+  /* ----- ④ OBJ 読み込み ----- */
+  const loader = new THREE.OBJLoader();
+
+  loader.load(
+    "model.obj",
+    (obj) => {
+
+      alert("OBJ 読み込み成功");
+
+      model = obj;
+
+      model.traverse((mesh) => {
+        if (mesh.isMesh) {
+          mesh.material.side = THREE.DoubleSide;
+        }
+      });
+
+      scene.add(model);
+
+      /* ----- 強制的に見える位置へ ----- */
+      const box = new THREE.Box3().setFromObject(model);
+      const size = box.getSize(new THREE.Vector3());
+      const center = box.getCenter(new THREE.Vector3());
+
+      model.position.sub(center);
+
+      const maxDim = Math.max(size.x, size.y, size.z);
+      model.scale.setScalar(1 / maxDim);
+
+      camera.position.set(0, 0, 2);
+      camera.lookAt(0, 0, 0);
+
+      /* ----- 操作 ----- */
+      controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.enablePan = false;
+      controls.enableDamping = true;
+
+      animate();
+    },
+    undefined,
+    (err) => {
+      alert("OBJ 読み込み失敗");
+      console.error(err);
+    }
+  );
+}
+
+/* ===============================
+   描画ループ
+================================ */
+function animate() {
+  requestAnimationFrame(animate);
+  if (controls) controls.update();
+  renderer.render(scene, camera);
+}
+
+/* ===============================
+   リサイズ対応
+================================ */
+window.addEventListener("resize", () => {
+  if (!camera || !renderer) return;
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
