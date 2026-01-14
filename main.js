@@ -96,7 +96,7 @@ function loadGLB(scene) {
 
   alert("GLB 読み込み開始");
 
-  fetch("model.glb")
+  fetch("/ar-test/model.glb")
     .then(res => {
       if (!res.ok) {
         throw new Error("fetch failed");
@@ -129,3 +129,4 @@ function loadGLB(scene) {
       alert("GLB 取得失敗");
     });
 }
+
