@@ -4,19 +4,22 @@ const video = document.getElementById("camera");
 const overlay = document.getElementById("overlay");
 const button = document.getElementById("startButton");
 
-button.addEventListener("click", async () => {
+button.addEventListener("click", () => {
   alert("開始ボタンが押されました");
   overlay.style.display = "none";
-  await startCamera();
-  alert("カメラ起動完了");
-  initThree();
+  startCamera();   // await しない
+  initThree();     // 即 Three.js 初期化
 });
 
-async function startCamera() {
-  const stream = await navigator.mediaDevices.getUserMedia({
+function startCamera() {
+  navigator.mediaDevices.getUserMedia({
     video: { facingMode: "environment" }
+  }).then(stream => {
+    video.srcObject = stream;
+    alert("カメラ起動完了");
+  }).catch(() => {
+    alert("カメラ起動失敗");
   });
-  video.srcObject = stream;
 }
 
 function initThree() {
@@ -26,10 +29,7 @@ function initThree() {
   alert("Scene OK");
 
   const camera = new THREE.PerspectiveCamera(
-    60,
-    window.innerWidth / window.innerHeight,
-    0.1,
-    100
+    60, window.innerWidth / window.innerHeight, 0.1, 100
   );
   camera.position.set(0, 0, 2);
   alert("Camera OK");
@@ -44,16 +44,22 @@ function initThree() {
   }
 
   renderer.setSize(window.innerWidth, window.innerHeight);
-  alert("Renderer サイズ設定 OK");
+  alert("Renderer サイズ OK");
 
   document.body.appendChild(renderer.domElement);
   alert("Canvas 追加 OK");
 
-  const light = new THREE.HemisphereLight(0xffffff, 0x444444, 1.2);
-  scene.add(light);
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x444444, 1.2));
   alert("Light OK");
 
   alert("Three.js 初期化 完了");
 
-  // ★ あえて GLB はまだ読み込まない
+  animate();
+
+  function animate() {
+    requestAnimationFrame(animate);
+    renderer.render(scene, camera);
+  }
 }
+
+
