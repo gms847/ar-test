@@ -8,9 +8,12 @@ button.addEventListener("click", () => {
   alert("開始ボタンが押されました");
   overlay.style.display = "none";
   startCamera();   // await しない
-  initThree();     // 即 Three.js 初期化
+  initThree();
 });
 
+/* --------------------
+   カメラ起動
+-------------------- */
 function startCamera() {
   navigator.mediaDevices.getUserMedia({
     video: { facingMode: "environment" }
@@ -22,44 +25,72 @@ function startCamera() {
   });
 }
 
+/* --------------------
+   Three.js 初期化
+-------------------- */
 function initThree() {
   alert("Three.js 初期化 開始");
 
   const scene = new THREE.Scene();
-  alert("Scene OK");
 
   const camera = new THREE.PerspectiveCamera(
-    60, window.innerWidth / window.innerHeight, 0.1, 100
+    60,
+    window.innerWidth / window.innerHeight,
+    0.1,
+    100
   );
   camera.position.set(0, 0, 2);
-  alert("Camera OK");
 
-  let renderer;
-  try {
-    renderer = new THREE.WebGLRenderer({ alpha: true });
-    alert("Renderer 生成 OK");
-  } catch (e) {
-    alert("Renderer 生成 NG");
-    return;
-  }
-
+  const renderer = new THREE.WebGLRenderer({ alpha: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
-  alert("Renderer サイズ OK");
-
   document.body.appendChild(renderer.domElement);
-  alert("Canvas 追加 OK");
 
   scene.add(new THREE.HemisphereLight(0xffffff, 0x444444, 1.2));
-  alert("Light OK");
 
   alert("Three.js 初期化 完了");
 
-  animate();
+  loadGLB(scene); // ← ★ここで呼ぶ
 
   function animate() {
     requestAnimationFrame(animate);
     renderer.render(scene, camera);
   }
+  animate();
 }
 
+/* --------------------
+   GLB 読み込み（←ここに追加）
+-------------------- */
+function loadGLB(scene) {
+  alert("GLB 読み込み開始");
 
+  fetch("model.glb")
+    .then(res => {
+      if (!res.ok) throw new Error("fetch failed");
+      return res.arrayBuffer();
+    })
+    .then(buffer => {
+      const loader = new THREE.GLTFLoader();
+      loader.parse(
+        buffer,
+        "",
+        gltf => {
+          alert("GLB 読み込み成功");
+
+          const model = gltf.scene;
+
+          // 初期調整
+          model.position.set(0, 0, 0);
+          model.scale.set(1, 1, 1);
+
+          scene.add(model);
+        },
+        () => {
+          alert("GLB パース失敗");
+        }
+      );
+    })
+    .catch(() => {
+      alert("GLB 取得失敗");
+    });
+}
