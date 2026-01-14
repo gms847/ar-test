@@ -11,6 +11,15 @@
       overflow: hidden;
       background: #000;
     }
+    #camera-video {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover; /* 画面いっぱいに引き伸ばす */
+      z-index: -1;      /* Three.jsより後ろに配置 */
+    }
     #overlay {
       position: fixed;
       inset: 0;
@@ -19,26 +28,15 @@
       align-items: center;
       justify-content: center;
       z-index: 1000;
-      pointer-events: auto;
     }
-    #startButton {
-      font-size: 20px;
-      padding: 12px 24px;
-    }
+
   </style>
 </head>
 
 <body>
-
-<div id="overlay">
-  <button id="startButton">開始</button>
-</div>
-
-<script src="three.min.js"></script>
-<script src="GLTFLoader.js"></script>
-<script src="OrbitControls.js"></script>
-<script src="main.js"></script>
-
+  <video id="camera-video" playsinline muted></video>
+  <div id="overlay">
+    <button id="startButton">開始</button>
+  </div>
 </body>
 </html>
-
