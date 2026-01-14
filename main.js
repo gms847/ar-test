@@ -1,134 +1,99 @@
-alert("main.js 実行確認");
-
-/* --------------------
-   DOM 取得
--------------------- */
-const video = document.getElementById("camera");
-const overlay = document.getElementById("overlay");
-const button = document.getElementById("startButton");
-
-/* --------------------
-   開始ボタン
--------------------- */
-button.addEventListener("click", () => {
-  alert("開始ボタンが押されました");
-  overlay.style.display = "none";
-
-  startCamera();
-  initThree();
-});
-
-/* --------------------
-   カメラ起動
--------------------- */
-function startCamera() {
-  navigator.mediaDevices.getUserMedia({
-    video: { facingMode: "environment" }
-  })
-  .then(stream => {
-    video.srcObject = stream;
-    alert("カメラ起動完了");
-  })
-  .catch(err => {
-    alert("カメラ起動失敗");
-  });
+const logEl = document.getElementById("log");
+function log(msg) {
+  console.log(msg);
+  logEl.textContent += msg + "\n";
 }
 
-/* --------------------
-   Three.js 初期化
--------------------- */
-function initThree() {
-  alert("Three.js 初期化 開始");
+log("main.js 実行確認");
 
-  // Scene
-  const scene = new THREE.Scene();
-  alert("scene OK");
+let scene, camera, renderer, controls;
 
-  // Camera
-  const camera = new THREE.PerspectiveCamera(
+document.getElementById("startButton").addEventListener("click", async () => {
+  alert("開始ボタンが押されました");
+  document.getElementById("overlay").style.display = "none";
+  await startAR();
+});
+
+async function startAR() {
+  log("Three.js 初期化 開始");
+
+  scene = new THREE.Scene();
+  log("scene OK");
+
+  camera = new THREE.PerspectiveCamera(
     60,
     window.innerWidth / window.innerHeight,
-    0.1,
+    0.01,
     100
   );
   camera.position.set(0, 0, 2);
-  alert("Camera ok");
+  log("Camera OK");
 
-  // Renderer
-  const renderer = new THREE.WebGLRenderer({ alpha: true });
-  alert("render 生成ok");
-
+  renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
-  alert("render サイズ ok");
-
+  renderer.setPixelRatio(window.devicePixelRatio);
   document.body.appendChild(renderer.domElement);
-  alert("Canvas 追加 OK");
+  log("renderer 生成 OK");
+  log("Canvas 追加 OK");
 
-  // Light
   const light = new THREE.HemisphereLight(0xffffff, 0x444444, 1.2);
   scene.add(light);
-  alert("light OK");
+  log("light OK");
 
-  alert("Three.js 初期化 ok");
+  controls = new THREE.OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
 
-  /* ★★★ 決定打テスト① ★★★ */
-  alert("initThree の最後まで到達");
+  log("Three.js 初期化 ok");
 
-  loadGLB(scene);
+  await startCamera();
+  loadGLB();
 
-  /* ★★★ 決定打テスト② ★★★ */
-  alert("loadGLB 呼び出し後");
-
-  // 描画ループ
-  function animate() {
-    requestAnimationFrame(animate);
-    renderer.render(scene, camera);
-  }
   animate();
 }
 
-/* --------------------
-   GLB 読み込み
--------------------- */
-function loadGLB(scene) {
-  /* ★★★ 決定打テスト③ ★★★ */
-  alert("★★ loadGLB 関数に入った ★★");
+async function startCamera() {
+  const stream = await navigator.mediaDevices.getUserMedia({
+    video: { facingMode: "environment" },
+    audio: false
+  });
 
-  alert("GLB 読み込み開始");
+  const video = document.createElement("video");
+  video.srcObject = stream;
+  video.playsInline = true;
+  await video.play();
 
-  fetch("https://gms847.github.io/ar-test/model.glb")
-    .then(res => {
-      if (!res.ok) {
-        throw new Error("fetch failed");
-      }
-      return res.arrayBuffer();
-    })
-    .then(buffer => {
-      const loader = new THREE.GLTFLoader();
+  const videoTexture = new THREE.VideoTexture(video);
+  scene.background = videoTexture;
 
-      loader.parse(
-        buffer,
-        "",
-        gltf => {
-          alert("GLB 読み込み成功");
-
-          const model = gltf.scene;
-
-          // 表示調整
-          model.position.set(0, 0, 0);
-          model.scale.set(1, 1, 1);
-
-          scene.add(model);
-        },
-        error => {
-          alert("GLB パース失敗");
-        }
-      );
-    })
-    .catch(err => {
-      alert("GLB 取得失敗");
-    });
+  log("カメラ起動完了");
 }
 
+function loadGLB() {
+  log("★★ GLB 読み込み開始 ★★");
 
+  const loader = new THREE.GLTFLoader();
 
+  loader.load(
+    "https://gms847.github.io/ar-test/model.glb",
+    (gltf) => {
+      log("★★ GLB 読み込み成功 ★★");
+
+      const model = gltf.scene;
+      model.position.set(0, 0, -1);
+      model.scale.set(1, 1, 1);
+
+      scene.add(model);
+    },
+    undefined,
+    (error) => {
+      log("★★ GLB 読み込み失敗 ★★");
+      console.error(error);
+    }
+  );
+}
+
+function animate() {
+  requestAnimationFrame(animate);
+  if (controls) controls.update();
+  renderer.render(scene, camera);
+}
