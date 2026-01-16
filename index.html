@@ -1,58 +1,217 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8">
-  <title>AR展示</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <style>
-    /* iOS特有の挙動をすべて無効化 */
-    * {
-      -webkit-tap-highlight-color: transparent;
-      -webkit-touch-callout: none;
-      -webkit-user-select: none;
-      user-select: none;
-    }
-    body { 
-      margin: 0; overflow: hidden; background: #000; 
-      position: fixed; width: 100%; height: 100%;
-    }
-    #camera-video { 
-      position: fixed; inset: 0; width: 100%; height: 100%; 
-      object-fit: cover; z-index: -1; 
-    }
-    /* ボタンではなく、画面全体を覆う案内幕にする */
-    #overlay { 
-      position: fixed; inset: 0; 
-      background: rgba(0,0,0,0.9); 
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center; 
-      z-index: 9999;
-      cursor: pointer; /* どこでも押せることを示す */
-    }
-    .guide-text {
-      color: white; font-size: 20px; font-weight: bold;
-      text-align: center; line-height: 1.6;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>AR Exhibit Layered Template</title>
+
+<style>
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: black;
+}
+
+/* ===== レイヤー1：カメラ ===== */
+#cameraLayer {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+}
+
+#cameraLayer video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ===== レイヤー2：Three.js ===== */
+#threeLayer {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none; /* ← 操作は上の層で */
+}
+
+/* ===== レイヤー3：タッチ操作 ===== */
+#touchLayer {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: auto;
+}
+
+/* ===== 開始UI ===== */
+#uiLayer {
+  position: fixed;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.85);
+}
+
+#startButton {
+  font-size: 20px;
+  padding: 14px 28px;
+}
+</style>
 </head>
+
 <body>
-  <video id="camera-video" playsinline muted autoplay></video>
-  
-  <div id="overlay">
-    <div class="guide-text">
-      画面をタップして開始<br>
-      <span style="font-size: 14px; font-weight: normal; opacity: 0.7;">(カメラの使用を許可してください)</span>
-    </div>
-  </div>
 
-  <script type="importmap">
-  { "imports": { "three": "./three.min.js" } }
-  </script>
-  <script type="module" src="main.js"></script>
+<!-- レイヤー1：カメラ -->
+<div id="cameraLayer">
+  <video id="camera" autoplay playsinline muted></video>
+</div>
+
+<!-- レイヤー2：Three.js -->
+<div id="threeLayer"></div>
+
+<!-- レイヤー3：タッチ操作 -->
+<div id="touchLayer"></div>
+
+<!-- 開始UI -->
+<div id="uiLayer">
+  <button id="startButton">開始</button>
+</div>
+
+<script type="module">
+/* =============================
+   Three.js 読み込み
+============================= */
+import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
+import { GLTFLoader } from "https://unpkg.com/three@0.160.0/examples/jsm/loaders/GLTFLoader.js";
+
+console.log("main.js 実行確認");
+
+/* =============================
+   DOM 取得
+============================= */
+const video = document.getElementById("camera");
+const threeLayer = document.getElementById("threeLayer");
+const touchLayer = document.getElementById("touchLayer");
+const uiLayer = document.getElementById("uiLayer");
+const startButton = document.getElementById("startButton");
+
+/* =============================
+   Three.js 変数
+============================= */
+let scene, camera, renderer, model;
+let isDragging = false;
+let lastX = 0;
+
+/* =============================
+   Three.js 初期化
+============================= */
+function initThree() {
+  console.log("Three.js 初期化 開始");
+
+  scene = new THREE.Scene();
+  console.log("scene OK");
+
+  camera = new THREE.PerspectiveCamera(
+    60,
+    window.innerWidth / window.innerHeight,
+    0.01,
+    100
+  );
+  camera.position.z = 1;
+  console.log("Camera OK");
+
+  renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(window.devicePixelRatio);
+  threeLayer.appendChild(renderer.domElement);
+  console.log("Canvas 追加 OK");
+
+  const light = new THREE.HemisphereLight(0xffffff, 0x444444, 1.2);
+  scene.add(light);
+  console.log("light OK");
+
+  console.log("Three.js 初期化 完了");
+}
+
+/* =============================
+   GLB 読み込み
+============================= */
+function loadGLB() {
+  console.log("GLB 読み込み開始");
+
+  const loader = new GLTFLoader();
+  loader.load(
+    "https://gms847.github.io/ar-test/model.glb",
+    (gltf) => {
+      model = gltf.scene;
+      model.scale.set(0.3, 0.3, 0.3);
+      scene.add(model);
+      console.log("GLB 読み込み成功");
+    },
+    undefined,
+    (error) => {
+      console.error("GLB 読み込み失敗", error);
+    }
+  );
+}
+
+/* =============================
+   カメラ起動
+============================= */
+async function startCamera() {
+  console.log("カメラ起動開始");
+  const stream = await navigator.mediaDevices.getUserMedia({
+    video: { facingMode: "environment" },
+    audio: false
+  });
+  video.srcObject = stream;
+  console.log("カメラ起動完了");
+}
+
+/* =============================
+   タッチ操作（回転）
+============================= */
+touchLayer.addEventListener("touchstart", (e) => {
+  if (!model) return;
+  isDragging = true;
+  lastX = e.touches[0].clientX;
+});
+
+touchLayer.addEventListener("touchmove", (e) => {
+  if (!isDragging || !model) return;
+  const x = e.touches[0].clientX;
+  const delta = x - lastX;
+  model.rotation.y += delta * 0.01;
+  lastX = x;
+});
+
+touchLayer.addEventListener("touchend", () => {
+  isDragging = false;
+});
+
+/* =============================
+   描画ループ
+============================= */
+function animate() {
+  requestAnimationFrame(animate);
+  renderer.render(scene, camera);
+}
+
+/* =============================
+   開始ボタン
+============================= */
+startButton.addEventListener("click", async () => {
+  alert("開始ボタンが押されました");
+
+  uiLayer.style.display = "none";
+
+  await startCamera();
+  initThree();
+  loadGLB();
+  animate();
+});
+</script>
+
 </body>
 </html>
-  </script>
-  <script type="module" src="main.js"></script>
-</body>
-</html>
-
