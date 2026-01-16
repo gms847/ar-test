@@ -3,71 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GLB Test</title>
-<style>
-  body { margin: 0; overflow: hidden; background: black; }
-</style>
+<title>JS Alive Test</title>
 </head>
 
 <body>
 
-<script type="module">
-import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
-import { GLTFLoader } from "https://unpkg.com/three@0.160.0/examples/jsm/loaders/GLTFLoader.js";
+<h1>JSテスト</h1>
 
-console.log("script start");
-
-/* ===== scene ===== */
-const scene = new THREE.Scene();
-console.log("scene OK");
-
-/* ===== camera ===== */
-const camera = new THREE.PerspectiveCamera(
-  60,
-  window.innerWidth / window.innerHeight,
-  0.1,
-  100
-);
-camera.position.z = 2;
-console.log("camera OK");
-
-/* ===== renderer ===== */
-const renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setSize(window.innerWidth, window.innerHeight);
-document.body.appendChild(renderer.domElement);
-console.log("renderer OK");
-
-/* ===== light ===== */
-const light = new THREE.HemisphereLight(0xffffff, 0x444444, 1.2);
-scene.add(light);
-console.log("light OK");
-
-/* ===== GLB ===== */
-const loader = new GLTFLoader();
-console.log("GLB load start");
-
-loader.load(
-  "./model.glb",
-  (gltf) => {
-    console.log("GLB 読み込み成功");
-
-    const model = gltf.scene;
-    model.scale.set(0.5, 0.5, 0.5);
-    model.position.set(0, 0, 0);
-    scene.add(model);
-  },
-  undefined,
-  (error) => {
-    console.error("GLB 読み込み失敗", error);
-  }
-);
-
-/* ===== animate ===== */
-function animate() {
-  requestAnimationFrame(animate);
-  renderer.render(scene, camera);
-}
-animate();
+<script>
+  alert("JavaScript が実行されています");
+  console.log("JS alive");
 </script>
 
 </body>
