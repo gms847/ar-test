@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AR表示</title>
+<title>Three.js 強制表示テスト</title>
 
 <style>
 html, body {
@@ -11,30 +11,15 @@ html, body {
   padding: 0;
   width: 100%;
   height: 100%;
-  overflow: hidden;
   background: black;
+  overflow: hidden;
 }
 
-#camera {
-  position: fixed;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  z-index: 0;
-}
-
-#threeLayer {
-  position: fixed;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-}
-
+/* 開始UI */
 #startLayer {
   position: fixed;
   inset: 0;
-  z-index: 2;
+  z-index: 10;
   background: black;
   display: flex;
   align-items: center;
@@ -50,17 +35,11 @@ html, body {
 
 <body>
 
-<video id="camera" autoplay playsinline muted></video>
-<div id="threeLayer"></div>
-
 <div id="startLayer">
   <button onclick="startAR()">タップして開始</button>
 </div>
 
-<!-- ★ 非 module（先に読み込む） -->
 <script src="start.js"></script>
-
-<!-- ★ module（後） -->
 <script type="module" src="main.js"></script>
 
 </body>
