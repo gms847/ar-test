@@ -1,31 +1,44 @@
-console.log("main.js 読み込み開始");
+console.log("main.js 実行開始");
 
 import * as THREE from "./three/three.module.js";
+import { GLTFLoader } from "./three/GLTFLoader.js";
 
-let started = false;
-
-const startLayer = document.getElementById("startLayer");
 const startButton = document.getElementById("startButton");
+const uiLayer = document.getElementById("uiLayer");
+const video = document.getElementById("camera");
+const threeLayer = document.getElementById("threeLayer");
 
-/* iOS Safari 対策：touchstart + click 両対応 */
-function onStart() {
-  if (started) return;
-  started = true;
+let scene, camera, renderer, model;
 
-  console.log("開始ボタンが押されました");
+/* =========================
+   開始ボタン（Safari確実）
+========================= */
+startButton.onclick = () => {
+  console.log("開始ボタン押下");
+  uiLayer.style.display = "none";
+  startCamera();
+  initThree();
+};
 
-  startLayer.style.display = "none";
-  init();
+/* =========================
+   カメラ起動
+========================= */
+async function startCamera() {
+  console.log("カメラ起動開始");
+
+  const stream = await navigator.mediaDevices.getUserMedia({
+    video: { facingMode: "environment" },
+    audio: false
+  });
+
+  video.srcObject = stream;
+  console.log("カメラ起動完了");
 }
 
-startButton.addEventListener("touchstart", onStart, { passive: true });
-startButton.addEventListener("click", onStart);
-
-/* ===== Three.js ===== */
-
-let scene, camera, renderer, cube;
-
-function init() {
+/* =========================
+   Three.js 初期化
+========================= */
+function initThree() {
   console.log("Three.js 初期化 開始");
 
   scene = new THREE.Scene();
@@ -38,26 +51,49 @@ function init() {
   );
   camera.position.z = 2;
 
-  renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
-  document.body.appendChild(renderer.domElement);
+  threeLayer.appendChild(renderer.domElement);
 
   const light = new THREE.DirectionalLight(0xffffff, 1);
   light.position.set(1, 1, 1);
   scene.add(light);
 
-  const geometry = new THREE.BoxGeometry();
-  const material = new THREE.MeshStandardMaterial({ color: 0xff0000 });
-  cube = new THREE.Mesh(geometry, material);
-  scene.add(cube);
+  loadGLB();
 
-  console.log("Three.js 初期化 完了");
   animate();
 }
 
+/* =========================
+   GLB 読み込み
+========================= */
+function loadGLB() {
+  console.log("GLB 読み込み開始");
+
+  const loader = new GLTFLoader();
+  loader.load(
+    "./model.glb",
+    (gltf) => {
+      model = gltf.scene;
+      scene.add(model);
+      console.log("GLB 読み込み成功");
+    },
+    undefined,
+    (error) => {
+      console.error("GLB 読み込み失敗", error);
+    }
+  );
+}
+
+/* =========================
+   レンダリング
+========================= */
 function animate() {
   requestAnimationFrame(animate);
-  cube.rotation.x += 0.01;
-  cube.rotation.y += 0.01;
+
+  if (model) {
+    model.rotation.y += 0.01;
+  }
+
   renderer.render(scene, camera);
 }
