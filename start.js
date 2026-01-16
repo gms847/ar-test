@@ -1,15 +1,27 @@
 console.log("start.js 読み込み");
 
-/* Safari が確実に認識するグローバル関数 */
-function startAR() {
-  console.log("startAR 呼び出し");
+async function startAR() {
+  console.log("startAR 実行");
 
   const startLayer = document.getElementById("startLayer");
+  const video = document.getElementById("camera");
+
+  /* ===== カメラ起動（ユーザー操作直下）===== */
+  const stream = await navigator.mediaDevices.getUserMedia({
+    video: { facingMode: "environment" },
+    audio: false
+  });
+
+  video.srcObject = stream;
+  await video.play();
+
+  console.log("カメラ起動完了");
+
+  /* UI を消す */
   startLayer.style.display = "none";
 
-  /* module 側に開始を通知 */
+  /* Three.js 開始を通知 */
   window.dispatchEvent(new Event("ar-start"));
 }
 
-/* グローバル公開（念のため） */
 window.startAR = startAR;
