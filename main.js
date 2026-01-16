@@ -3,31 +3,14 @@ console.log("main.js 読み込み");
 import * as THREE from "./three/three.module.js";
 import { GLTFLoader } from "./three/GLTFLoader.js";
 
-const video = document.getElementById("camera");
 const threeLayer = document.getElementById("threeLayer");
 
 let scene, camera, renderer, model;
 
-/* ★ start.js からの開始通知を受け取る */
-window.addEventListener("ar-start", async () => {
-  console.log("AR start イベント受信");
-
-  await startCamera();
+window.addEventListener("ar-start", () => {
+  console.log("Three.js 初期化開始");
   initThree();
 });
-
-/* ===== カメラ ===== */
-async function startCamera() {
-  const stream = await navigator.mediaDevices.getUserMedia({
-    video: { facingMode: "environment" },
-    audio: false
-  });
-
-  video.srcObject = stream;
-  await video.play();
-
-  console.log("カメラ起動完了");
-}
 
 /* ===== Three.js ===== */
 function initThree() {
@@ -53,7 +36,6 @@ function initThree() {
   animate();
 }
 
-/* ===== GLB ===== */
 function loadGLB() {
   const loader = new GLTFLoader();
   loader.load(
@@ -68,10 +50,8 @@ function loadGLB() {
   );
 }
 
-/* ===== 描画 ===== */
 function animate() {
   requestAnimationFrame(animate);
   if (model) model.rotation.y += 0.01;
   renderer.render(scene, camera);
 }
-
