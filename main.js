@@ -6,15 +6,16 @@ import { GLTFLoader } from "./three/GLTFLoader.js";
 const video = document.getElementById("camera");
 const threeLayer = document.getElementById("threeLayer");
 const startLayer = document.getElementById("startLayer");
-const startButton = document.getElementById("startButton");
 
 let scene, camera, renderer, model;
 let started = false;
 
-/* ===== 開始（必ずユーザー操作） ===== */
-startButton.onclick = async () => {
+/* ★ Safari 確実起動用：window に直接生やす */
+window.startAR = async function () {
   if (started) return;
   started = true;
+
+  console.log("startAR 実行");
 
   startLayer.style.display = "none";
 
@@ -32,7 +33,7 @@ async function startCamera() {
   });
 
   video.srcObject = stream;
-  await video.play(); // ← これが重要
+  await video.play(); // Safari 重要
 
   console.log("カメラ起動完了");
 }
@@ -74,14 +75,13 @@ function loadGLB() {
       console.log("GLB 読み込み成功");
     },
     undefined,
-    (e) => console.error(e)
+    (e) => console.error("GLB 読み込み失敗", e)
   );
 }
 
-/* ===== ループ ===== */
+/* ===== 描画 ===== */
 function animate() {
   requestAnimationFrame(animate);
-
   if (model) model.rotation.y += 0.01;
   renderer.render(scene, camera);
 }
