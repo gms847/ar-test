@@ -1,89 +1,58 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>展示用AR</title>
-
-<!-- model-viewer -->
-<script type="module"
-  src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js">
-</script>
-
-<style>
-html, body {
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  height: 100%;
-  background: black;
-  overflow: hidden;
-  touch-action: none;
-}
-
-/* 開始UI */
-#startLayer {
-  position: fixed;
-  inset: 0;
-  background: black;
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-#startLayer button {
-  font-size: 24px;
-  padding: 20px 40px;
-}
-
-/* model-viewer */
-model-viewer {
-  width: 100vw;
-  height: 100vh;
-  background: black;
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AR展示</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: #000;
+      color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      text-align: center;
+    }
+    .container {
+      max-width: 90%;
+    }
+    .ar-button img {
+      width: 220px;
+      height: auto;
+    }
+    .note {
+      margin-top: 20px;
+      font-size: 14px;
+      opacity: 0.8;
+    }
+  </style>
 </head>
-
 <body>
 
-<!-- 開始画面 -->
-<div id="startLayer">
-  <button onclick="start()">タップして開始</button>
-</div>
+  <div class="container">
+    <h1>ARで展示を見る</h1>
 
-<!-- 3D表示 -->
-<model-viewer
-  id="viewer"
-  src="model.glb"
-  poster="poster.png"
-  camera-controls
-  disable-pan
-  exposure="1.1"
-  shadow-intensity="0.8"
-  interaction-prompt="none"
-  style="display:none;"
-  ar-modes="quick-look webxr scene-viewer">
-</model-viewer>
+    <!-- Quick Look 起動 -->
+    <a class="ar-button" rel="ar" href="model.usdz">
+      <img src="start.png" alt="ARで見る">
+    </a>
 
-<script>
-function start() {
-  // UIを消す
-  document.getElementById("startLayer").style.display = "none";
-
-  // 3D表示
-  const viewer = document.getElementById("viewer");
-  viewer.style.display = "block";
-
-  // iOS対策：一度 focus を当てる
-  viewer.focus();
-
-  console.log("展示開始");
-}
-</script>
+    <div class="note">
+      ※ iPhoneのSafariでご覧ください<br>
+      ※ カメラ使用を許可してください
+    </div>
+  </div>
 
 </body>
 </html>
+
+
+</body>
+</html>
+
 
 
