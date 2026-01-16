@@ -1,47 +1,36 @@
-console.log("AR main.js 読み込み");
+console.log("main.js 読み込み");
 
 import * as THREE from "./three/three.module.js";
 import { GLTFLoader } from "./three/GLTFLoader.js";
 
 const video = document.getElementById("camera");
 const threeLayer = document.getElementById("threeLayer");
-const startLayer = document.getElementById("startLayer");
 
 let scene, camera, renderer, model;
-let started = false;
 
-/* ★ Safari 確実起動用：window に直接生やす */
-window.startAR = async function () {
-  if (started) return;
-  started = true;
-
-  console.log("startAR 実行");
-
-  startLayer.style.display = "none";
+/* ★ start.js からの開始通知を受け取る */
+window.addEventListener("ar-start", async () => {
+  console.log("AR start イベント受信");
 
   await startCamera();
   initThree();
-};
+});
 
 /* ===== カメラ ===== */
 async function startCamera() {
-  console.log("カメラ起動開始");
-
   const stream = await navigator.mediaDevices.getUserMedia({
     video: { facingMode: "environment" },
     audio: false
   });
 
   video.srcObject = stream;
-  await video.play(); // Safari 重要
+  await video.play();
 
   console.log("カメラ起動完了");
 }
 
 /* ===== Three.js ===== */
 function initThree() {
-  console.log("Three.js 初期化");
-
   scene = new THREE.Scene();
 
   camera = new THREE.PerspectiveCamera(
@@ -85,3 +74,4 @@ function animate() {
   if (model) model.rotation.y += 0.01;
   renderer.render(scene, camera);
 }
+
