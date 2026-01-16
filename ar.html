@@ -15,7 +15,6 @@ html, body {
   background: black;
 }
 
-/* カメラ */
 #camera {
   position: fixed;
   inset: 0;
@@ -25,7 +24,6 @@ html, body {
   z-index: 0;
 }
 
-/* Three.js */
 #threeLayer {
   position: fixed;
   inset: 0;
@@ -33,7 +31,6 @@ html, body {
   pointer-events: none;
 }
 
-/* 開始レイヤー */
 #startLayer {
   position: fixed;
   inset: 0;
@@ -57,7 +54,7 @@ html, body {
 <div id="threeLayer"></div>
 
 <div id="startLayer">
-  <button id="startButton">タップして開始</button>
+  <button onclick="startAR()">タップして開始</button>
 </div>
 
 <script type="module" src="main.js"></script>
