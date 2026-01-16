@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GLB Test</title>
+<title>Three.js Cube Test</title>
 <style>
-  body { margin: 0; overflow: hidden; background: #000; }
+  body { margin: 0; overflow: hidden; background: black; }
 </style>
 </head>
 
@@ -13,54 +13,41 @@
 
 <script type="module">
 import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
-import { GLTFLoader } from "https://unpkg.com/three@0.160.0/examples/jsm/loaders/GLTFLoader.js";
 
 console.log("script start");
 
-/* ===== Three.js 基本 ===== */
+/* ===== scene ===== */
 const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x000000);
 console.log("scene OK");
 
+/* ===== camera ===== */
 const camera = new THREE.PerspectiveCamera(
   60,
   window.innerWidth / window.innerHeight,
-  0.01,
+  0.1,
   100
 );
 camera.position.z = 2;
 console.log("camera OK");
 
+/* ===== renderer ===== */
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 console.log("renderer OK");
 
-/* ===== light ===== */
-const light = new THREE.HemisphereLight(0xffffff, 0x444444, 1.2);
-scene.add(light);
-console.log("light OK");
+/* ===== cube ===== */
+const geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+const cube = new THREE.Mesh(geometry, material);
+scene.add(cube);
+console.log("cube OK");
 
-/* ===== GLB ===== */
-const loader = new GLTFLoader();
-console.log("GLB load start");
-
-loader.load(
-  "./model.glb",
-  (gltf) => {
-    console.log("GLB 読み込み成功");
-    const model = gltf.scene;
-    model.scale.set(0.5, 0.5, 0.5);
-    scene.add(model);
-  },
-  undefined,
-  (err) => {
-    console.error("GLB 読み込み失敗", err);
-  }
-);
-
-/* ===== render ===== */
+/* ===== animate ===== */
 function animate() {
   requestAnimationFrame(animate);
+  cube.rotation.y += 0.01;
   renderer.render(scene, camera);
 }
 animate();
