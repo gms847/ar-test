@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AR Exhibition</title>
+<title>展示開始</title>
 
 <style>
 html, body {
@@ -11,71 +11,29 @@ html, body {
   padding: 0;
   width: 100%;
   height: 100%;
-  overflow: hidden;
   background: black;
 }
 
-/* ===== レイヤー ===== */
-
-/* カメラ（最下層） */
-#cameraLayer {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-}
-#cameraLayer video {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-/* Three.js（中間層） */
-#threeLayer {
-  position: fixed;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-}
-
-/* UI（最前面） */
-#uiLayer {
-  position: fixed;
-  inset: 0;
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: auto;
-}
-
-/* 開始ボタン */
-#startButton {
+button {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
   font-size: 24px;
   padding: 20px 40px;
-  background: white;
-  color: black;
-  border: none;
-  border-radius: 8px;
 }
 </style>
 </head>
 
 <body>
 
-<!-- カメラ -->
-<div id="cameraLayer">
-  <video id="camera" autoplay playsinline muted></video>
-</div>
+<button onclick="start()">開始</button>
 
-<!-- Three.js -->
-<div id="threeLayer"></div>
-
-<!-- UI -->
-<div id="uiLayer">
-  <button id="startButton">開始</button>
-</div>
-
-<script type="module" src="main.js"></script>
+<script>
+function start() {
+  location.href = "ar.html";
+}
+</script>
 
 </body>
 </html>
