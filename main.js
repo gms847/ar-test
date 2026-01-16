@@ -2,14 +2,28 @@ console.log("main.js 読み込み開始");
 
 import * as THREE from "./three/three.module.js";
 
-console.log("Three.js import OK");
+let started = false;
+
+const startLayer = document.getElementById("startLayer");
+const startButton = document.getElementById("startButton");
+
+/* iOS Safari 対策：touchstart + click 両対応 */
+function onStart() {
+  if (started) return;
+  started = true;
+
+  console.log("開始ボタンが押されました");
+
+  startLayer.style.display = "none";
+  init();
+}
+
+startButton.addEventListener("touchstart", onStart, { passive: true });
+startButton.addEventListener("click", onStart);
+
+/* ===== Three.js ===== */
 
 let scene, camera, renderer, cube;
-
-document.getElementById("start").addEventListener("click", () => {
-  document.getElementById("start").style.display = "none";
-  init();
-});
 
 function init() {
   console.log("Three.js 初期化 開始");
