@@ -1,16 +1,28 @@
-console.log("ARページ 起動");
+console.log("AR main.js 読み込み");
 
 import * as THREE from "./three/three.module.js";
 import { GLTFLoader } from "./three/GLTFLoader.js";
 
 const video = document.getElementById("camera");
-const container = document.getElementById("threeLayer");
+const threeLayer = document.getElementById("threeLayer");
+const startLayer = document.getElementById("startLayer");
+const startButton = document.getElementById("startButton");
 
 let scene, camera, renderer, model;
+let started = false;
 
-/* =====================
-   カメラ起動
-===================== */
+/* ===== 開始（必ずユーザー操作） ===== */
+startButton.onclick = async () => {
+  if (started) return;
+  started = true;
+
+  startLayer.style.display = "none";
+
+  await startCamera();
+  initThree();
+};
+
+/* ===== カメラ ===== */
 async function startCamera() {
   console.log("カメラ起動開始");
 
@@ -20,12 +32,12 @@ async function startCamera() {
   });
 
   video.srcObject = stream;
+  await video.play(); // ← これが重要
+
   console.log("カメラ起動完了");
 }
 
-/* =====================
-   Three.js 初期化
-===================== */
+/* ===== Three.js ===== */
 function initThree() {
   console.log("Three.js 初期化");
 
@@ -41,7 +53,7 @@ function initThree() {
 
   renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
-  container.appendChild(renderer.domElement);
+  threeLayer.appendChild(renderer.domElement);
 
   const light = new THREE.DirectionalLight(0xffffff, 1);
   light.position.set(1, 1, 1);
@@ -51,9 +63,7 @@ function initThree() {
   animate();
 }
 
-/* =====================
-   GLB 読み込み
-===================== */
+/* ===== GLB ===== */
 function loadGLB() {
   const loader = new GLTFLoader();
   loader.load(
@@ -64,27 +74,14 @@ function loadGLB() {
       console.log("GLB 読み込み成功");
     },
     undefined,
-    (e) => {
-      console.error("GLB 読み込み失敗", e);
-    }
+    (e) => console.error(e)
   );
 }
 
-/* =====================
-   レンダリング
-===================== */
+/* ===== ループ ===== */
 function animate() {
   requestAnimationFrame(animate);
 
-  if (model) {
-    model.rotation.y += 0.01;
-  }
-
+  if (model) model.rotation.y += 0.01;
   renderer.render(scene, camera);
 }
-
-/* =====================
-   起動
-===================== */
-startCamera();
-initThree();
