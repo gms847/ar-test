@@ -1,29 +1,21 @@
 console.log("main.js 読み込み");
 
 import * as THREE from "./three/three.module.js";
-import { GLTFLoader } from "./three/GLTFLoader.js";
 
-const threeLayer = document.getElementById("threeLayer");
+let scene, camera, renderer, cube;
 
-let scene, camera, renderer;
-let testCube;   // ★ 赤い立方体
-let model;      // ★ GLB
-
-/* start.js からの開始通知 */
-window.addEventListener("ar-start", () => {
+window.addEventListener("three-start", () => {
   console.log("Three.js 初期化開始");
   initThree();
 });
 
-/* ===== Three.js 初期化 ===== */
 function initThree() {
-  console.log("initThree 開始");
+  console.log("initThree");
 
-  /* シーン */
+  /* ===== シーン ===== */
   scene = new THREE.Scene();
-  console.log("scene OK");
 
-  /* カメラ */
+  /* ===== カメラ ===== */
   camera = new THREE.PerspectiveCamera(
     60,
     window.innerWidth / window.innerHeight,
@@ -32,70 +24,47 @@ function initThree() {
   );
   camera.position.set(0, 0, 3);
   camera.lookAt(0, 0, 0);
-  console.log("camera OK");
 
-  /* レンダラー */
+  /* ===== レンダラー（強制可視） ===== */
   renderer = new THREE.WebGLRenderer({
     alpha: false,
     antialias: true
   });
+
+  /* 背景を赤くする（見えなければ異常） */
+  renderer.setClearColor(0x880000, 1);
   renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.setClearColor(0x000000, 0);
-  threeLayer.appendChild(renderer.domElement);
-  console.log("renderer OK");
 
-  /* ===== ライト ===== */
-  scene.add(new THREE.AmbientLight(0xffffff, 1.5));
+  /* Safari 対策：直接 style 指定 */
+  renderer.domElement.style.position = "fixed";
+  renderer.domElement.style.top = "0";
+  renderer.domElement.style.left = "0";
+  renderer.domElement.style.width = "100%";
+  renderer.domElement.style.height = "100%";
+  renderer.domElement.style.zIndex = "9999";
+  renderer.domElement.style.pointerEvents = "none";
 
-  const dir = new THREE.DirectionalLight(0xffffff, 2);
-  dir.position.set(2, 2, 2);
-  scene.add(dir);
-  console.log("light OK");
+  document.body.appendChild(renderer.domElement);
 
-  /* ==============================
-     ★ 決定打テスト（赤い立方体）
-     ============================== */
+  console.log("renderer 追加");
+
+  /* ===== 赤い立方体 ===== */
   const geometry = new THREE.BoxGeometry(1, 1, 1);
   const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-  testCube = new THREE.Mesh(geometry, material);
-  scene.add(testCube);
-  console.log("赤い立方体 追加");
+  cube = new THREE.Mesh(geometry, material);
+  scene.add(cube);
 
-  /* GLB 読み込み（あとで） */
-  loadGLB();
+  console.log("赤 cube 追加");
 
   animate();
 }
 
-/* ===== GLB ===== */
-function loadGLB() {
-  console.log("GLB 読み込み開始");
-
-  const loader = new GLTFLoader();
-  loader.load(
-    "./model.glb",
-    (gltf) => {
-      model = gltf.scene;
-
-      model.scale.set(0.5, 0.5, 0.5);
-      model.position.set(0, 0, 0);
-
-      scene.add(model);
-      console.log("GLB 読み込み成功");
-    },
-    undefined,
-    (error) => {
-      console.error("GLB 読み込み失敗", error);
-    }
-  );
-}
-
-/* ===== 描画ループ ===== */
 function animate() {
   requestAnimationFrame(animate);
 
-  if (testCube) {
-    testCube.rotation.y += 0.01;
+  if (cube) {
+    cube.rotation.y += 0.01;
+    cube.rotation.x += 0.005;
   }
 
   renderer.render(scene, camera);
