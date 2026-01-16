@@ -13,26 +13,45 @@ html, body {
   background: black;
 }
 
-#start {
+/* 開始レイヤー（最前面） */
+#startLayer {
   position: fixed;
   inset: 0;
   background: rgba(0,0,0,0.9);
-  color: white;
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 9999;
+}
+
+/* 開始ボタン */
+#startButton {
   font-size: 24px;
-  z-index: 10;
+  padding: 20px 40px;
+  background: #ffffff;
+  color: #000000;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  pointer-events: auto;
 }
 </style>
-
 </head>
 
 <body>
 
-<div id="start">開始</div>
+<div id="startLayer">
+  <button id="startButton">開始</button>
+</div>
 
 <script type="module" src="main.js"></script>
 
 </body>
 </html>
+
+
+<script type="module" src="main.js"></script>
+
+</body>
+</html>
+
